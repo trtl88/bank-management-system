@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#define TRANSACTIONS 6
 
-void Report()
+void report()
 {
     char acc[15],current[20];
     FILE *f;
@@ -28,7 +29,7 @@ void Report()
     fseek(f,-2,SEEK_END);
     char amount[10],c;
     int n=0;
-    while(n<6)
+    while(n<TRANSACTIONS)
     {
         int counter=-3;
         c=fgetc(f);
