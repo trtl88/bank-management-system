@@ -22,6 +22,9 @@ void MENU();
 void SortByName();
 void SortByBalance();
 void SortByDate();
+void ModifyName();
+void ModifyMobile();
+void ModifyEmail();
 
 typedef struct
 {
@@ -46,25 +49,12 @@ typedef struct
 } log;
 
 account a[100]; //Global variable
-int AccCount=0; //index to know how many lines in accounts file
+int AccCount=0,loginflag=0,ModifyIndex;;
 const char* MonthName[]= {"January","February","March","April","May","June","July","August","September","October","November","December"};
-int loginflag=0;
 
 int main()
 {
     MENU();
-    /*int d;
-    FILE*f=fopen("1234567890.txt","w");
-    fprintf(f,"+100\n-2\n-1\n+1\n-2000\n+10000\n");
-    fclose(f);
-    printf("choose option: ");
-    scanf("%d",&d);
-    if(d==1)
-        report();
-    if(d==2)
-        print();
-    if(d==3)
-        quit();*/
     return 0;
 }
 
@@ -105,6 +95,7 @@ void LOAD()
 {
     int i=0;
     char x[500], temp[10];
+    AccCount=0;
     FILE *f2= fopen("accounts.txt", "r");
     while(!feof(f2))
     {
@@ -149,185 +140,755 @@ void LOAD()
 
 void SEARCH()
 {
-    /*
-       char Accnumber[11];
-       int i,flag=0;
-       while(1)
-       {
-           printf("Enter account number to view account's info: ");
-           gets(Accnumber);
-           Accnumber[strcspn(Accnumber,"\n")]='\0';
-           if (!isnumeric(Accnumber))
-           {
-               printf("Invalid input. Please enter numeric digits only.\n");
-           }
-           else
-               break;
-       }
-       for(i=0;i<AccCount;i++)
-       {
-           if(strstr(a[i].AccNo,Accnumber)!=NULL)
-           {
-               printf("Account Number: %s\n",a[i].AccNo);
-               printf("Name: %s\n",a[i].Name);
-               printf("E-mail: %s\n",a[i].Email);
-               printf("Balance: %0.2f\n",a[i].Balance);
-               printf("Mobile: %s\n",a[i].Mobile);
-               printf("Date Opened: %s %d\n",MonthName[a[i].DateOpened.month-1],a[i].DateOpened.year);
-               flag=1;
-               break;
-           }
-       }
-       if(flag==0)
-           printf("Account number not found");*/
+    char AccNumber[20];
+    int flag=0,numeric=0;
+    printf("Enter the account number to search for: ");
+    while(!numeric)
+    {
+        while(1)
+        {
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
+        }
+        for(int i=0; AccNumber[i]!='\0'; i++)
+        {
+            if (!isdigit(AccNumber[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else
+                numeric=1;
+        }
+    }
+    for (int i=0; i<AccCount; i++)
+    {
+        if (strcmp(a[i].AccNo,AccNumber)==0)
+        {
+            printf("Account Number: %s\n",a[i].AccNo);
+            printf("Name: %s\n",a[i].Name);
+            printf("E-mail: %s\n",a[i].Email);
+            printf("Balance: %0.2f\n",a[i].Balance);
+            printf("Mobile: %s\n",a[i].Mobile);
+            printf("Date Opened: %s %d\n\n",MonthName[a[i].DateOpened.month - 1],a[i].DateOpened.year);
+            flag=1;
+            break;
+        }
+    }
+    if (flag==0)
+        printf("Account not found\n\n");
+    MENU();
 }
 
 void ADVANCED()
 {
-    /*
-       char userName[20];
-       int i,flag=0;
-       printf("Enter username to view: ");
-       gets(userName);
-       printf("Search Results:\n");
-       for(i=0;i<AccCount;i++){
-              if(strstr(a[i].Name,userName)!=NULL){
-               printf("Account Number: %s\n",a[i].AccNo);
-               printf("Name: %s\n",a[i].Name);
-               printf("E-mail: %s\n",a[i].Email);
-               printf("Balance: %0.2f\n",a[i].Balance);
-               printf("Mobile: %s\n",a[i].Mobile);
-               printf("Date Opened: %s %d\n",MonthName[a[i].DateOpened.month-1],a[i].DateOpened.year);
-               flag=1;
-              }
-          }
-          if(flag==0)
-           {
-           printf("Account number not found");
-           }*/
+    char userName[20];
+    int i,flag=0;
+    printf("Enter keyword: ");
+    scanf(" %[^\n]",userName);
+    printf("Search Results:\n");
+    for(i=0; i<AccCount; i++)
+    {
+        if(strstr(a[i].Name,userName)!=NULL)
+        {
+            printf("Account Number: %s\n",a[i].AccNo);
+            printf("Name: %s\n",a[i].Name);
+            printf("E-mail: %s\n",a[i].Email);
+            printf("Balance: %0.2f\n",a[i].Balance);
+            printf("Mobile: %s\n",a[i].Mobile);
+            printf("Date Opened: %s %d\n\n",MonthName[a[i].DateOpened.month-1],a[i].DateOpened.year);
+            flag=1;
+        }
+    }
+    if(flag==0)
+        printf("No accounts found.\n\n");
+    MENU();
 }
 
 void ADD()
 {
-    char newacc[20];
-    int i,flag=1,lengthflag=1,digitflag;;
+    char AccNumber[20],balance[20];
+    int i,x,found=0,numeric=0,nameflag=0,emailflag=0;
     printf("For account creation, provide a 10-digit account number: ");
-    do
+    while(!numeric)
     {
-        do
+        while(1)
         {
-            do
-            {
-                scanf(" %s",newacc);
-                if(strlen(newacc)!=10)
-                {
-                    printf("Only 10 characters allowed, try again: ");
-                    lengthflag=0;
-                }
-                else lengthflag=1;
-            }
-            while(lengthflag==0);
-
-            digitflag=1;
-            char *temp=newacc;
-            while (*temp)
-            {
-                if (!isdigit(*temp))
-                {
-                    digitflag=0;
-                    printf("Only digits allowed, try again: ");
-                    break;
-                }
-                temp++;
-            }
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
         }
-        while(digitflag==0);
-        flag=1;
-        for(i=0; i<AccCount; i++)
+        for(int i=0; AccNumber[i]!='\0'; i++)
         {
-            if(strcmp(newacc,a[i].AccNo)==0)
+            if (!isdigit(AccNumber[i]))
             {
-                flag=0;
-                printf("Account number already exists, try again: ");
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
             }
+            else
+                numeric=1;
         }
     }
-    while(flag==0);
-
-    char file_name[15];
-    strcpy(file_name,newacc);
-    file_name[10]='.';
-    file_name[11]='t';
-    file_name[12]='x';
-    file_name[13]='t';
-    file_name[14]='\0';
-    FILE *f3=fopen(file_name,"w");
-    fclose(f3);
-    strcpy(a[AccCount].AccNo,newacc);
-    printf("Enter name: ");
-    scanf(" %[^\n]",a[AccCount].Name);
-    printf("Enter e-mail address: ");
-    scanf(" %s",a[AccCount].Email);
+    while(!found)
+    {
+        for(i=0; i<AccCount; i++)
+        {
+            if(strcmp(AccNumber,a[i].AccNo)==0)
+            {
+                printf("Account number already exists, try again: ");
+                found=0;
+                break;
+            }
+            else found=1;
+        }
+    }
+    strcpy(a[AccCount].AccNo,AccNumber);
+    while(!nameflag)
+    {
+        printf("Enter name: ");
+        scanf(" %[^\n]",a[AccCount].Name);
+        for(i=0; a[AccCount].Name[i]; i++)
+        {
+            if((!(a[AccCount].Name[i]))&&(a[AccCount].Name[i])!=' ')
+            {
+                printf("The name shouldn't include any numbers or special characters.\n");
+                nameflag=0;
+                break;
+            }
+            else nameflag=1;
+        }
+    }
+    while(!emailflag)
+    {
+        printf("Enter e-mail address: ");
+        scanf(" %s",a[AccCount].Email);
+        if((strstr(a[AccCount].Email,"@")==NULL)&&(strstr(a[AccCount].Email,".com")==NULL)&&(strstr(a[AccCount].Email," ")==NULL))
+        {
+            printf("Invalid email format.\n");
+            emailflag=0;
+        }
+        else emailflag=1;
+    }
+    numeric=0;
     printf("Enter balance: ");
-    scanf("%f",&a[AccCount].Balance);
+    while(!numeric)
+    {
+        scanf(" %s",balance);
+        for(i=0; balance[i]!='\0'; i++)
+        {
+            if((!isdigit(balance[i]))&&balance[i]!='.')
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else numeric=1;
+        }
+    }
+    a[AccCount].Balance=atof(balance);
     printf("Enter mobile number: ");
-    scanf(" %s",a[AccCount].Mobile);
+    numeric=0;
+    while(!numeric)
+    {
+        scanf(" %s",a[AccCount].Mobile);
+        for(i=0; a[AccCount].Mobile[i]!='\0'; i++)
+        {
+            if(!isdigit(a[AccCount].Mobile[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else numeric=1;
+        }
+    }
     time_t t;
     t=time(NULL);
     struct tm tm=* localtime(&t);
     a[AccCount].DateOpened.month=tm.tm_mon+1;
     a[AccCount].DateOpened.year=tm.tm_year+1900;
-    FILE *f2=fopen("accounts.txt","a");
-    fprintf(f2,"\n%s,%s,%s,%.2f,%s,%d-%d",a[AccCount].AccNo,a[AccCount].Name,a[AccCount].Email,a[AccCount].Balance,a[AccCount].Mobile,a[AccCount].DateOpened.month,a[AccCount].DateOpened.year);
-    fclose(f2);
     AccCount++;
     printf("Account added!\n\n");
-    MENU();
-    return;
+    printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+    scanf("%d",&x);
+    while(x!=1&&x!=2)
+    {
+        printf("Invalid. Enter 1 or 2:\n");
+        scanf("%d",&x);
+    }
+
+
+    if(x==1)
+    {
+        FILE *f=fopen("accounts.txt", "w");
+        for(i=0; i<AccCount; i++)
+        {
+            if(i==0)
+                fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+            else fprintf(f,"\n%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+        }
+        fclose(f);
+        printf("Saved changes!\n\n");
+        char file_name[15];
+        strcpy(file_name,AccNumber);
+        strcat(file_name,".txt");
+        FILE *f3=fopen(file_name,"w");
+        fclose(f3);
+        LOAD();
+        MENU();
+        return;
+    }
+    else
+    {
+        printf("Discarded changes.\n\n");
+        LOAD();
+        MENU();
+        return;
+    }
 }
 
 void DELETE()
 {
+    char AccNumber[20],temp[20];
+    int i,x,found,numeric=0;
+    float temp2;
+    printf("Enter the account number you want to delete: ");
+    while(!numeric)
+    {
+        while(1)
+        {
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
+        }
+        for(int i=0; AccNumber[i]!='\0'; i++)
+        {
+            if (!isdigit(AccNumber[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else
+                numeric=1;
+        }
+    }
 
+    for(i=0; i<AccCount; i++)
+    {
+        if(strcmp(AccNumber,a[i].AccNo)!=0)
+        {
+            found=0;
+        }
+        else
+        {
+            found=1;
+            if(a[i].Balance==0)
+            {
+                strcpy(temp,(a[i].AccNo));
+                strcpy((a[i].AccNo),(a[AccCount-1].AccNo));
+                strcpy((a[AccCount-1].AccNo),temp);
+                strcpy(temp,(a[i].Name));
+                strcpy((a[i].Name),(a[AccCount-1].Name));
+                strcpy((a[AccCount-1].Name),temp);
+                strcpy(temp,(a[i].Email));
+                strcpy((a[i].Email),(a[AccCount-1].Email));
+                strcpy((a[AccCount-1].Email),temp);
+                temp2=a[i].Balance;
+                a[i].Balance=a[AccCount-1].Balance;
+                a[AccCount-1].Balance=temp2;
+                strcpy(temp,(a[i].Mobile));
+                strcpy((a[i].Mobile),(a[AccCount-1].Mobile));
+                strcpy((a[AccCount-1].Mobile),temp);
+                temp2=a[i].DateOpened.month;
+                a[i].DateOpened.month=a[AccCount-1].DateOpened.month;
+                a[AccCount-1].DateOpened.month=temp2;
+                temp2=a[i].DateOpened.year;
+                a[i].DateOpened.year=a[AccCount-1].DateOpened.year;
+                a[AccCount-1].DateOpened.year=temp2;
+                AccCount--;
+                printf("Account deleted!\n\n");
+
+
+                printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+                scanf("%d",&x);
+                while(x!=1&&x!=2)
+                {
+                    printf("Invalid. Enter 1 or 2:\n");
+                    scanf("%d",&x);
+                }
+
+
+                if(x==1)
+                {
+                    FILE *f=fopen("accounts.txt", "w");
+                    for(i=0; i<AccCount; i++)
+                    {
+                        if(i==0)
+                            fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+                        else fprintf(f,"\n%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+                    }
+                    fclose(f);
+                    printf("Saved changes!\n\n");
+                    strcat(AccNumber,".txt");
+                    remove(AccNumber);
+                    LOAD();
+                    MENU();
+                    return;
+                }
+                else
+                {
+                    printf("Discarded changes.\n\n");
+                    LOAD();
+                    MENU();
+                    return;
+                }
+                break;
+            }
+            else
+            {
+                printf("Balance not equal zero, can't delete account.\n\n");
+                MENU();
+                return;
+            }
+        }
+    }
+    if(!found)
+    {
+        printf("Account not found.\n\n");
+        MENU();
+        return;
+    }
 }
+
 void MODIFY()
 {
-
+    int i,j,found=0,numeric=0;
+    char AccNumber[20];
+    printf("Enter account number to modify its data: ");
+    while(!numeric)
+    {
+        while(1)
+        {
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
+        }
+        for(int i=0; AccNumber[i]!='\0'; i++)
+        {
+            if (!isdigit(AccNumber[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else
+                numeric=1;
+        }
+    }
+    for(i=0; i<AccCount; i++)
+    {
+        if(strcmp(AccNumber,a[i].AccNo)==0)
+        {
+            found=1;
+            ModifyIndex=i;
+            break;
+        }
+    }
+    if(!found)
+    {
+        printf("Account not found.\n\n");
+        MENU();
+        return;
+    }
+    printf("\nAccount Number: %s\n",a[ModifyIndex].AccNo);
+    printf("Name: %s\n",a[ModifyIndex].Name);
+    printf("E-mail: %s\n",a[ModifyIndex].Email);
+    printf("Balance: %0.2f\n",a[ModifyIndex].Balance);
+    printf("Mobile: %s\n",a[ModifyIndex].Mobile);
+    printf("Date Opened: %s %d\n\n",MonthName[a[ModifyIndex].DateOpened.month - 1],a[ModifyIndex].DateOpened.year);
+    while(1)
+    {
+        printf("Which one from the following do you want to modify:\n1:Name\n2:Mobile\n3:Email\n4.SAVE\n#:");
+        scanf("%d",&j);
+        while(j<=0||j>=5)
+        {
+            printf("Invalid. Enter a number between 1 and 4:\n#: ");
+            scanf("%d",&j);
+        }
+        switch(j)
+        {
+        case 1:
+            ModifyName();
+            break;
+        case 2:
+            ModifyMobile();
+            break;
+        case 3:
+            ModifyEmail();
+            break;
+        case 4:
+            SAVE();
+            return;
+        }
+    }
 }
+
 void WITHDRAW()
 {
+    char AccNumber[20];
+    float amount;
+    int i,x,numeric=0,found=0;
+    printf("Enter account number: ");
+    while(!numeric)
+    {
+        while(1)
+        {
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
+        }
+        for(int i=0; AccNumber[i]!='\0'; i++)
+        {
+            if (!isdigit(AccNumber[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else
+                numeric=1;
+        }
+    }
+    for(i=0; i<AccCount; i++)
+    {
+        if(strcmp(AccNumber,a[i].AccNo)==0)
+        {
+            printf("Enter amount to be withdrawn: ");
+            scanf("%f",&amount);
+            if(amount>10000)
+                printf("Maximum withdraw limit is $10,000\nTransaction failed!\n\n");
+            else
+            {
+                a[i].Balance-=amount;
+                printf("Transaction Successful!\n\n");
+                printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+                scanf("%d",&x);
+                while(x!=1&&x!=2)
+                {
+                    printf("Invalid. Enter 1 or 2:\n");
+                    scanf("%d",&x);
+                }
 
+
+                if(x==1)
+                {
+                    FILE *f=fopen("accounts.txt", "w");
+                    for(i=0; i<AccCount; i++)
+                    {
+                        if(i==0)
+                            fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+                        else fprintf(f,"\n%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+                    }
+                    fclose(f);
+                    printf("Saved changes!\n\n");
+                    strcat(AccNumber,".txt");
+                    FILE *f1=fopen(AccNumber,"a");
+                    fprintf(f1,"-%.2f\n",amount);
+                    fclose(f1);
+                    LOAD();
+                    MENU();
+                    return;
+                }
+                else
+                {
+                    printf("Discarded changes.\n\n");
+                    LOAD();
+                    MENU();
+                    return;
+                }
+            }
+            found=1;
+            break;
+        }
+    }
+    if(found==0)
+    {
+        printf("Account not found.\n\n");
+        MENU();
+        return;
+    }
 }
+
 void DEPOSIT()
 {
+    char AccNumber[20];
+    float amount;
+    int i,x,numeric=0,found=0;
+    printf("Enter account number: ");
+    while(!numeric)
+    {
+        while(1)
+        {
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
+        }
+        for(int i=0; AccNumber[i]!='\0'; i++)
+        {
+            if (!isdigit(AccNumber[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else
+                numeric=1;
+        }
+    }
+    for(i=0; i<AccCount; i++)
+    {
+        if(strcmp(AccNumber,a[i].AccNo)==0)
+        {
+            printf("Enter amount to be deposited: ");
+            scanf("%f",&amount);
+            if(amount>10000)
+                printf("Maximum deposit limit is $10,000\nTransaction failed!\n\n");
+            else
+            {
+                a[i].Balance+=amount;
+                printf("Transaction Successful!\n\n");
+                printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+                scanf("%d",&x);
+                while(x!=1&&x!=2)
+                {
+                    printf("Invalid. Enter 1 or 2:\n");
+                    scanf("%d",&x);
+                }
 
+
+                if(x==1)
+                {
+                    FILE *f=fopen("accounts.txt", "w");
+                    for(i=0; i<AccCount; i++)
+                    {
+                        if(i==0)
+                            fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+                        else fprintf(f,"\n%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+                    }
+                    fclose(f);
+                    printf("Saved changes!\n\n");
+                    strcat(AccNumber,".txt");
+                    FILE *f1=fopen(AccNumber,"a");
+                    fprintf(f1,"+%.2f\n",amount);
+                    fclose(f1);
+                    LOAD();
+                    MENU();
+                    return;
+                }
+                else
+                {
+                    printf("Discarded changes.\n\n");
+                    LOAD();
+                    MENU();
+                    return;
+                }
+            }
+            found=1;
+            break;
+        }
+    }
+    if(found==0)
+    {
+        printf("Account not found.\n\n");
+        MENU();
+        return;
+    }
 }
+
 void TRANSFER()
 {
+    char sender[20],receiver[20];
+    int i,x,flag=0,found=0,numeric=0,sendID,receiveID;
+    float amount;
+    printf("Please enter sender's account number: ");
+    while(found==0)
+    {
+        while(!numeric)
+        {
+            while(1)
+            {
+                scanf("%s",sender);
+                if(strlen(sender)!=10)
+                    printf("Only 10 characters allowed, try again: ");
+                else break;
+            }
+            for(int i=0; sender[i]!='\0'; i++)
+            {
+                if (!isdigit(sender[i]))
+                {
+                    numeric=0;
+                    printf("Only digits allowed, try again: ");
+                    break;
+                }
+                else
+                    numeric=1;
+            }
+        }
+        for(i=0; i<AccCount; i++)
+        {
+            if(strcmp(sender,a[i].AccNo)==0)
+            {
+                sendID=i;
+                found=1;
+                break;
+            }
+        }
+        if(found==0)
+            printf("Account not found, try again: ");
+    }
+    numeric=0;
+    found=0;
+    printf("Please enter receiver's account number: ");
+    while(found==0)
+    {
+        while(!numeric)
+        {
+            while(1)
+            {
+                scanf("%s",receiver);
+                if(strlen(receiver)!=10)
+                    printf("Only 10 characters allowed, try again: ");
+                else break;
+            }
+            for(int i=0; receiver[i]!='\0'; i++)
+            {
+                if (!isdigit(receiver[i]))
+                {
+                    numeric=0;
+                    printf("Only digits allowed, try again: ");
+                    break;
+                }
+                else
+                    numeric=1;
+            }
+        }
+        for(i=0; i<AccCount; i++)
+        {
+            if(strcmp(receiver,a[i].AccNo)==0)
+            {
+                receiveID=i;
+                found=1;
+                break;
+            }
+        }
+        if(found==0)
+        {
+            printf("Account not found, try again: ");
+            flag=0;
+        }
+    }
+    printf("Enter amount to be transferred: ");
+    flag=0;
+    while(!flag)
+    {
+        scanf("%f",&amount);
+        if(amount>10000)
+        {
 
+            printf("Maximum transfer limit is $10,000!\nEnter amount again: ");
+            flag=0;
+        }
+        else flag=1;
+    }
+    a[sendID].Balance-=amount;
+    a[receiveID].Balance+=amount;
+    printf("Transaction Successful!\n");
+    printf("Sender's new balance=%.2f\n",a[sendID].Balance);
+    printf("Receiver's new balance=%.2f\n\n",a[receiveID].Balance);
+    printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+    scanf("%d",&x);
+    while(x!=1&&x!=2)
+    {
+        printf("Invalid. Enter 1 or 2:\n");
+        scanf("%d",&x);
+    }
+
+
+    if(x==1)
+    {
+        FILE *f=fopen("accounts.txt", "w");
+        for(i=0; i<AccCount; i++)
+        {
+            if(i==0)
+                fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+            else fprintf(f,"\n%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+        }
+        fclose(f);
+        printf("Saved changes!\n\n");
+        strcat(sender,".txt");
+        strcat(receiver,".txt");
+        FILE *fs=fopen(sender,"a");
+        FILE *fr=fopen(receiver,"a");
+        fprintf(fs,"-%.2f\n",amount);
+        fprintf(fr,"+%.2f\n",amount);
+        fclose(fs);
+        fclose(fr);
+        LOAD();
+        MENU();
+        return;
+    }
+    else
+    {
+        printf("Discarded changes.\n\n");
+        LOAD();
+        MENU();
+        return;
+    }
 }
 
 void REPORT()
 {
-    char acc[15];
-    FILE *f;
-    printf("\nEnter account number to view last 5 transactions made: ");
-    scanf("%s",acc);
-    strcat(acc,".txt");
-    while((strlen(acc)!=14)||(f=fopen(acc,"r"))==NULL)
+    char AccNumber[20];
+    int numeric=0;
+    printf("Enter account number to view last 5 transactions made: ");
+    while(!numeric)
     {
-        if(strlen(acc)!=14)
+        while(1)
         {
-            printf("Invalid account number, try again: ");
-            scanf("%s",acc);
-            strcat(acc, ".txt");
+            scanf("%s",AccNumber);
+            if(strlen(AccNumber)!=10)
+                printf("Only 10 characters allowed, try again: ");
+            else break;
         }
-        else
+        for(int i=0; AccNumber[i]!='\0'; i++)
         {
-            printf("Account number not found, try again: ");
-            scanf("%s",acc);
-            strcat(acc, ".txt");
+            if (!isdigit(AccNumber[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else
+                numeric=1;
         }
+    }
+    strcat(AccNumber,".txt");
+    FILE *f;
+    if((f=fopen(AccNumber,"r"))==NULL)
+    {
+        printf("No history found for this account.\n\n");
+        MENU();
+        return;
     }
     printf("Last 5 transactions(newest to oldest): \n");
     fseek(f,-3,SEEK_END); //sets position of pointer right before the last number in the file
@@ -359,6 +920,7 @@ void REPORT()
     printf("\n");
     fclose(f);
     MENU();
+    return;
 }
 
 void PRINT()
@@ -389,7 +951,7 @@ void PRINT()
     }
     printf("\nAccounts sorted by %s:\n",sort);
     int i;
-    for(i=0; i<AccCount-1; i++)
+    for(i=0; i<AccCount; i++)
     {
         printf("Account Number: %s\n",a[i].AccNo);
         printf("Name: %s\n",a[i].Name);
@@ -402,7 +964,41 @@ void PRINT()
     return;
 }
 
-void SAVE();
+void SAVE()
+{
+    int x,i;
+    printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+    scanf("%d",&x);
+    while(x!=1&&x!=2)
+    {
+        printf("Invalid. Enter 1 or 2:\n");
+        scanf("%d",&x);
+    }
+
+
+    if(x==1)
+    {
+        FILE *f=fopen("accounts.txt", "w");
+        for(i=0; i<AccCount; i++)
+        {
+            if(i==0)
+                fprintf(f,"%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+            else fprintf(f,"\n%s,%s,%s,%.2f,%s,%d-%d",a[i].AccNo,a[i].Name,a[i].Email,a[i].Balance,a[i].Mobile,a[i].DateOpened.month,a[i].DateOpened.year);
+        }
+        fclose(f);
+        printf("Saved changes!\n\n");
+        LOAD();
+        MENU();
+        return;
+    }
+    else
+    {
+        printf("Discarded changes.\n\n");
+        LOAD();
+        MENU();
+        return;
+    }
+}
 
 void QUIT()
 {
@@ -526,4 +1122,68 @@ void SortByDate()
             }
         }
     }
+}
+void ModifyName()
+{
+    printf("Enter the new name: ");
+    char n[100];
+    scanf(" %[^\n]", n);
+    int i=0;
+    while(n[i])
+    {
+        if (!(isalpha(n[i])) && n[i]!=' ')
+        {
+            printf("The name shouldn't include any numbers or special characters.\n");
+            ModifyName();
+            return;
+        }
+        i++;
+    }
+    strcpy(a[ModifyIndex].Name, n);
+    printf("Modified name!\n");
+    return;
+}
+void ModifyMobile()
+{
+    int i,numeric=0;
+    printf("Enter the new mobile number: ");
+    char n[20];
+    while(!numeric)
+    {
+        while(1)
+        {
+            scanf(" %s", n);
+            if(strlen(n)!=11)
+                printf("Invalid. Enter 11 digits: ");
+            else break;
+        }
+        for(i=0; n[i]!='\0'; i++)
+        {
+            if (!isdigit(n[i]))
+            {
+                numeric=0;
+                printf("Only digits allowed, try again: ");
+                break;
+            }
+            else numeric=1;
+        }
+    }
+    strcpy(a[ModifyIndex].Mobile, n);
+    printf("Modified mobile number!\n");
+    return;
+}
+void ModifyEmail()
+{
+    char n[100];
+    printf("Enter new email address: ");
+    scanf(" %s",n);
+    if((strstr(n,"@")==NULL)&&(strstr(n,".com")==NULL)&&(strstr(n," ")==NULL))
+    {
+        printf("Invalid email format.\n");
+        ModifyEmail();
+        return;
+    }
+    strcpy(a[ModifyIndex].Email,n);
+    printf("Modified e-mail!\n");
+    return;
 }
