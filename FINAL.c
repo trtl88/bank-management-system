@@ -49,7 +49,7 @@ typedef struct
 } log;
 
 account a[100]; //Global variable
-int AccCount=0,loginflag=0,ModifyIndex;;
+int AccCount=0,loginflag=0,ModifyIndex;
 const char* MonthName[]= {"January","February","March","April","May","June","July","August","September","October","November","December"};
 
 int main()
@@ -213,29 +213,31 @@ void ADD()
     char AccNumber[20],balance[20];
     int i,x,found=0,numeric=0,nameflag=0,emailflag=0;
     printf("For account creation, provide a 10-digit account number: ");
-    while(!numeric)
-    {
-        while(1)
-        {
-            scanf("%s",AccNumber);
-            if(strlen(AccNumber)!=10)
-                printf("Only 10 characters allowed, try again: ");
-            else break;
-        }
-        for(int i=0; AccNumber[i]!='\0'; i++)
-        {
-            if (!isdigit(AccNumber[i]))
-            {
-                numeric=0;
-                printf("Only digits allowed, try again: ");
-                break;
-            }
-            else
-                numeric=1;
-        }
-    }
     while(!found)
     {
+        numeric=0;
+        while(!numeric)
+        {
+            while(1)
+            {
+                scanf(" %s",AccNumber);
+                if(strlen(AccNumber)!=10)
+                    printf("Only 10 characters allowed, try again: ");
+                else break;
+            }
+            for(int i=0; AccNumber[i]!='\0'; i++)
+            {
+                if (!isdigit(AccNumber[i]))
+                {
+                    numeric=0;
+                    printf("Only digits allowed, try again: ");
+                    break;
+                }
+                else
+                    numeric=1;
+            }
+        }
+
         for(i=0; i<AccCount; i++)
         {
             if(strcmp(AccNumber,a[i].AccNo)==0)
@@ -254,7 +256,7 @@ void ADD()
         scanf(" %[^\n]",a[AccCount].Name);
         for(i=0; a[AccCount].Name[i]; i++)
         {
-            if((!(a[AccCount].Name[i]))&&(a[AccCount].Name[i])!=' ')
+            if((!isalpha(a[AccCount].Name[i]))&&(a[AccCount].Name[i])!=' ')
             {
                 printf("The name shouldn't include any numbers or special characters.\n");
                 nameflag=0;
@@ -314,7 +316,7 @@ void ADD()
     a[AccCount].DateOpened.year=tm.tm_year+1900;
     AccCount++;
     printf("Account added!\n\n");
-    printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n");
+    printf("Do you want to save this operation?\n1.Yes\n2.No, discard changes.\n#:");
     scanf("%d",&x);
     while(x!=1&&x!=2)
     {
