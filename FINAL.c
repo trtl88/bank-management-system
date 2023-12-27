@@ -293,22 +293,31 @@ void ADD()
         }
     }
     a[AccCount].Balance=atof(balance);
-    printf("Enter mobile number: ");
+    char mobile[25];
     numeric=0;
+    printf("Enter mobile number: ");
     while(!numeric)
     {
-        scanf(" %s",a[AccCount].Mobile);
-        for(i=0; a[AccCount].Mobile[i]!='\0'; i++)
+        while(1)
         {
-            if(!isdigit(a[AccCount].Mobile[i]))
+            scanf(" %s",mobile);
+            if(strlen(mobile)!=11)
+                printf("Only 11 characters allowed, try again: ");
+            else break;
+        }
+        for(int i=0; mobile[i]!='\0'; i++)
+        {
+            if (!isdigit(mobile[i]))
             {
                 numeric=0;
                 printf("Only digits allowed, try again: ");
                 break;
             }
-            else numeric=1;
+            else
+                numeric=1;
         }
     }
+    strcpy(a[AccCount].Mobile,mobile);
     time_t t;
     t=time(NULL);
     struct tm tm=* localtime(&t);
