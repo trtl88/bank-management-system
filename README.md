@@ -62,3 +62,18 @@ username password
 - Supports up to 100 accounts in memory
 - Maximum transaction amount is $10,000
 - Accounts must have zero balance before deletion
+
+## Testing
+
+Sample data files are included in the repo to test the system.
+
+**Login credentials** (`users.txt`):
+| Username | Password |
+|---|---|
+| (check users.txt) | (check users.txt) |
+
+**Test accounts** (`accounts.txt`):
+- Account No: `1234567890`
+- Account No: `9780134567`
+
+**Sample transaction logs** are included for both test accounts.
